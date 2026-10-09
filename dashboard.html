@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Study Dashboard | Study Time{% endblock %}
+{% block scripts %}
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<script defer src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <main class="dashboard-shell">
+        <header class="dashboard-header">
+            <div>
+                <p class="eyebrow">PERSONAL STUDY LOG</p>
+                <h1>Study Dashboard</h1>
+                <p class="dashboard-subtitle">Your study rhythm, at a glance.</p>
+            </div>
+            <nav class="dashboard-actions" aria-label="Download data">
+                <a class="tracker-link" href="/api/export/sessions.csv">Sessions CSV</a>
+                <a class="tracker-link" href="/api/export/events.csv">Events CSV</a>
+                <a class="tracker-link" href="/api/backup">Download backup</a>
+            </nav>
+        </header>
+
+        <section class="summary-grid" aria-label="Study summaries">
+            <article class="summary-card">
+                <p>Today</p>
+                <strong id="today-total">--:--:--</strong>
+                <span>study time</span>
+            </article>
+            <article class="summary-card">
+                <p>This week</p>
+                <strong id="week-total">--:--:--</strong>
+                <span>study time</span>
+            </article>
+            <article class="summary-card">
+                <p>This month</p>
+                <strong id="month-total">--:--:--</strong>
+                <span>study time</span>
+            </article>
+            <article class="summary-card split-card">
+                <p>All-time split</p>
+                <div class="split-row"><span>Data Analyst</span><strong id="data-analyst-total">--:--:--</strong></div>
+                <div class="split-row"><span>SDE</span><strong id="sde-total">--:--:--</strong></div>
+            </article>
+            <article class="summary-card streak-card">
+                <p>Current streak</p>
+                <strong id="streak-total">0</strong>
+                <span>consecutive days</span>
+            </article>
+        </section>
+
+        <section class="technology-dashboard-section" aria-labelledby="technology-breakdown-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">TECHNOLOGY BREAKDOWN</p>
+                    <h2 id="technology-breakdown-heading">Study hours by topic</h2>
+                </div>
+            </div>
+            <div class="technology-chart-grid" id="technology-chart-grid"></div>
+        </section>
+
+        <section class="coding-profiles-section" aria-labelledby="coding-profiles-heading">
+            <header class="coding-profile-header">
+                <div>
+                    <p class="eyebrow">PRACTICE TRACKER</p>
+                    <h2 id="coding-profiles-heading">Coding Profiles</h2>
+                </div>
+                <div class="coding-profile-header-actions">
+                    <div class="coding-check-status">
+                        <span class="coding-sync-spinner" id="coding-sync-spinner" aria-hidden="true" hidden></span>
+                        <p class="coding-last-synced" id="coding-last-synced">Last checked: Not yet</p>
+                    </div>
+                    <button class="dashboard-button dashboard-button-primary" id="coding-sync-button" type="button">
+                        Sync now
+                    </button>
+                </div>
+            </header>
+
+            <div class="coding-profile-panel" role="region" aria-label="LeetCode profile">
+                <div class="leetcode-profile-layout" id="leetcode-profile-content" aria-live="polite"></div>
+            </div>
+
+            <form class="coding-profile-form" id="coding-profile-form">
+                <label><span>LeetCode profile URL</span><input name="leetcode_url" type="url" maxlength="500" placeholder="https://leetcode.com/u/username/" autocomplete="url"></label>
+                <button class="dashboard-button dashboard-button-quiet" type="submit">Save profile links</button>
+            </form>
+            <p class="coding-profile-message" id="coding-profile-message" role="status" hidden></p>
+            <div class="coding-toast-region" id="coding-toast-region" aria-live="polite" aria-atomic="true"></div>
+        </section>
+
+        <section class="learning-path-section" aria-labelledby="learning-path-heading">
+            <div class="learning-path-heading">
+                <div>
+                    <p class="eyebrow">LEARNING PATH</p>
+                    <h2 id="learning-path-heading">Topic progress</h2>
+                </div>
+                <label class="learning-domain-select" for="learning-path-domain">
+                    <span>Domain</span>
+                    <select id="learning-path-domain">
+                        {% for domain in domains %}
+                        <option value="{{ domain.id }}">{{ domain.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <p class="learning-coverage" id="learning-coverage" role="status">Loading topic progress...</p>
+            <div class="learning-path-list" id="learning-path-list"></div>
+            <p class="learning-path-message" id="learning-path-message" role="status" hidden></p>
+        </section>
+
+        <p class="table-message" id="dashboard-message" role="status" hidden></p>
+
+        <section class="charts-grid" aria-label="Study charts">
+            <article class="chart-panel">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">LAST 30 DAYS</p>
+                        <h2>Daily study hours</h2>
+                    </div>
+                </div>
+                <div class="chart-frame chart-frame-wide">
+                    <canvas id="daily-chart" aria-label="Daily study hours over the last 30 days" role="img"></canvas>
+                </div>
+            </article>
+            <article class="chart-panel">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">ALL TIME</p>
+                        <h2>Time by domain</h2>
+                    </div>
+                </div>
+                <div class="chart-frame chart-frame-pie">
+                    <canvas id="domain-chart" aria-label="Study time split by domain" role="img"></canvas>
+                </div>
+            </article>
+        </section>
+    </main>
+{% endblock %}

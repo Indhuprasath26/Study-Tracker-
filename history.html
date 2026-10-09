@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Study History | Study Time{% endblock %}
+{% block scripts %}
+<script defer src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<main class="dashboard-shell history-page">
+    <header class="dashboard-header">
+        <div>
+            <p class="eyebrow">SESSION ARCHIVE</p>
+            <h1>History</h1>
+            <p class="dashboard-subtitle">Review sessions and their event timelines.</p>
+        </div>
+        <nav class="dashboard-actions" aria-label="Download data">
+            <a class="tracker-link" href="/api/export/sessions.csv">Sessions CSV</a>
+            <a class="tracker-link" href="/api/export/events.csv">Events CSV</a>
+            <a class="tracker-link" href="/api/backup">Download backup</a>
+        </nav>
+    </header>
+
+    <section class="history-section" aria-labelledby="history-heading">
+        <div class="history-heading">
+            <div>
+                <p class="eyebrow">ALL SESSIONS</p>
+                <h2 id="history-heading" tabindex="-1">Study sessions</h2>
+            </div>
+            <p id="history-count" class="history-count" role="status"></p>
+        </div>
+
+        <form class="history-filters" id="history-filters">
+            <div class="filter-field">
+                <label for="filter-start">From</label>
+                <input id="filter-start" name="start_date" type="date">
+            </div>
+            <div class="filter-field">
+                <label for="filter-end">To</label>
+                <input id="filter-end" name="end_date" type="date">
+            </div>
+            <div class="filter-field">
+                <label for="filter-domain">Domain</label>
+                <select id="filter-domain" name="domain_id">
+                    <option value="">All domains</option>
+                    {% for domain in domains %}
+                    <option value="{{ domain.id }}">{{ domain.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-field filter-field-technology">
+                <label for="filter-technology">Technology</label>
+                <select id="filter-technology" name="technology_id" disabled>
+                    <option value="">Choose a domain first</option>
+                </select>
+            </div>
+            <label class="college-filter" for="filter-college">
+                <input id="filter-college" name="college_day" type="checkbox" value="1">
+                College days only
+            </label>
+            <div class="filter-actions">
+                <button class="dashboard-button dashboard-button-primary" type="submit">Apply filters</button>
+                <button class="dashboard-button dashboard-button-quiet" id="clear-filters" type="reset">Clear</button>
+            </div>
+        </form>
+
+        <p class="table-message" id="history-message" role="status" hidden></p>
+        <div class="table-scroll">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Domain</th>
+                        <th scope="col">Technology</th>
+                        <th scope="col">College day</th>
+                        <th scope="col">Start</th>
+                        <th scope="col">End</th>
+                        <th scope="col">Study time</th>
+                        <th scope="col">Pause time</th>
+                    </tr>
+                </thead>
+                <tbody id="history-rows"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <dialog class="event-dialog" id="event-dialog" aria-labelledby="event-dialog-heading">
+        <div class="event-dialog-heading">
+            <div>
+                <p class="eyebrow">SESSION DETAIL</p>
+                <h2 id="event-dialog-heading">Event log</h2>
+            </div>
+            <button class="dialog-close" id="close-event-dialog" type="button" aria-label="Close event log">×</button>
+        </div>
+        <div class="table-scroll event-table-scroll">
+            <table class="history-table event-table">
+                <thead><tr><th scope="col">Event</th><th scope="col">Timestamp</th></tr></thead>
+                <tbody id="event-rows"></tbody>
+            </table>
+        </div>
+        <p class="table-message" id="event-message" role="status" hidden></p>
+    </dialog>
+</main>
+{% endblock %}

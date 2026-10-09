@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Study Time Tracker{% endblock %}
+{% block scripts %}
+<script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <main class="tracker app-shell">
+        <header class="page-header">
+            <div class="brand-mark" aria-hidden="true">ST</div>
+            <div class="page-title">
+                <p class="eyebrow">PERSONAL STUDY LOG</p>
+                <h1>Study Time</h1>
+            </div>
+            <p class="today-date" id="today-date"></p>
+        </header>
+
+        <section class="tracker-card" aria-label="Study session tracker">
+            <div class="card-heading">
+                <div>
+                    <p class="eyebrow">SESSION CONTROL</p>
+                    <h2>Today's focus</h2>
+                </div>
+                <div class="status-badge" id="status-badge" data-status="idle" role="status" aria-live="polite">
+                    <span class="status-indicator" aria-hidden="true"></span>
+                    <span id="session-status-text">Idle</span>
+                </div>
+            </div>
+
+            <div class="timer-block">
+                <p class="timer-label">Study time</p>
+                <p class="timer" id="study-timer">00:00:00</p>
+                <p class="long-session-warning" id="long-session-warning" role="status" hidden>
+                    This session has been active for over 6 hours. Did you forget to log off?
+                </p>
+                <div class="paused-time-panel" id="paused-time-panel" hidden>
+                    <p class="timer-label">Paused for</p>
+                    <p class="paused-timer" id="paused-timer">00:00:00</p>
+                </div>
+            </div>
+
+            <section class="session-panel login-panel" aria-labelledby="session-heading">
+                <h2 id="session-heading" class="section-heading">Set up a session</h2>
+                <form id="login-form">
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <span class="field-label" id="domain-field-label">Study domain</span>
+                            <div class="domain-selector" id="domain-selector" role="radiogroup" aria-labelledby="domain-field-label">
+                                {% for domain in domains %}
+                                <button class="domain-option" type="button" role="radio" data-domain-id="{{ domain.id }}" aria-checked="{{ 'true' if loop.first else 'false' }}" tabindex="{{ '0' if loop.first else '-1' }}">
+                                    <span class="domain-option-icon" aria-hidden="true">
+                                        {% if domain.name == 'Data Analyst' %}
+                                        <svg class="chart-icon" viewBox="0 0 24 24" fill="none">
+                                            <path d="M4 19.5h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                            <path d="M6.5 17v-5m5 5V6m5 11V9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                                        </svg>
+                                        {% elif domain.name == 'SDE' %}
+                                        <span class="code-icon">&lt;/&gt;</span>
+                                        {% elif domain.name == 'DSA' %}
+                                        <svg class="tree-icon" viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 5v5M12 10H6v4m6-4h6v4m-12 0v5m6-5v5m6-5v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <circle cx="12" cy="4" r="2" fill="currentColor"/>
+                                            <circle cx="6" cy="14" r="2" fill="currentColor"/>
+                                            <circle cx="18" cy="14" r="2" fill="currentColor"/>
+                                            <circle cx="6" cy="20" r="1.5" fill="currentColor"/>
+                                            <circle cx="12" cy="20" r="1.5" fill="currentColor"/>
+                                            <circle cx="18" cy="20" r="1.5" fill="currentColor"/>
+                                        </svg>
+                                        {% else %}
+                                        <span class="domain-generic-icon">{{ domain.name[:1] }}</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="domain-option-name">{{ domain.name }}</span>
+                                </button>
+                                {% endfor %}
+                            </div>
+                            <select class="visually-hidden" id="domain-select" name="domain_id" required aria-hidden="true" tabindex="-1">
+                                {% for domain in domains %}
+                                <option value="{{ domain.id }}" {{ 'selected' if loop.first else '' }}>{{ domain.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label class="college-day-option" for="college-day">
+                            <input id="college-day" name="is_college_day" type="checkbox">
+                            <span>Today is a college day</span>
+                        </label>
+                    </div>
+
+                    <div class="technology-field" id="technology-field">
+                        <span class="field-label" id="technology-field-label">Technology / Topic</span>
+                        <div class="technology-category-filter" id="technology-category-filter" role="tablist" aria-label="SDE technology category" hidden></div>
+                        <div class="technology-chips" id="technology-chips" role="radiogroup" aria-labelledby="technology-field-label" aria-busy="true"></div>
+                        <input class="visually-hidden" id="technology-id" name="technology_id" type="hidden" value="">
+                        <p class="technology-hint" id="technology-hint" role="status" aria-live="polite">Select a technology to start</p>
+                    </div>
+
+                    <button class="button button-login" id="login-button" type="submit">Login</button>
+                    <p class="error-message" id="login-error" role="alert" aria-live="polite" hidden></p>
+                </form>
+            </section>
+
+            <section class="session-panel active-panel" id="active-panel" aria-labelledby="active-domain" hidden>
+                <div class="active-session-heading">
+                    <p class="eyebrow">FOCUS AREA</p>
+                    <h2 id="active-domain"></h2>
+                </div>
+                <div class="session-actions">
+                    <button class="button button-pause" id="pause-toggle" type="button">Pause</button>
+                    <button class="button button-logoff" id="logoff-button" type="button">Log Off</button>
+                </div>
+                <p class="error-message" id="session-error" role="alert" aria-live="polite" hidden></p>
+            </section>
+        </section>
+
+        <section class="daily-goals" aria-labelledby="daily-goals-heading">
+            <div class="goals-heading">
+                <div>
+                    <p class="eyebrow">DAILY TARGETS</p>
+                    <h2 id="daily-goals-heading">Goals by domain</h2>
+                </div>
+                <span class="goals-date" id="goals-date"></span>
+            </div>
+            <div class="goal-list">
+                {% for domain in domains %}
+                <form class="goal-row" data-domain-id="{{ domain.id }}">
+                    <div class="goal-domain">
+                        <div class="goal-title-row">
+                            <strong>{{ domain.name }}</strong>
+                            <span class="goal-progress-label" id="goal-progress-{{ domain.id }}">Set a target</span>
+                        </div>
+                        <progress id="goal-bar-{{ domain.id }}" value="0" max="100" aria-label="{{ domain.name }} daily goal progress"></progress>
+                    </div>
+                    <label class="goal-input-label" for="goal-hours-{{ domain.id }}">
+                        Target hours
+                        <input id="goal-hours-{{ domain.id }}" name="target_hours" type="number" min="0.25" max="24" step="0.25" inputmode="decimal" placeholder="Hours" required>
+                    </label>
+                    <button class="goal-save-button" type="submit">Save</button>
+                </form>
+                {% endfor %}
+            </div>
+            <p class="goal-message" id="goal-message" role="status" aria-live="polite" hidden></p>
+        </section>
+
+        <footer class="page-footer">One session at a time · Your history stays on this device</footer>
+
+        <dialog class="summary-dialog" id="summary-dialog" aria-labelledby="summary-heading">
+            <p class="eyebrow">SESSION SAVED</p>
+            <h2 id="summary-heading">Study summary</h2>
+            <dl class="summary-list">
+                <div><dt>Domain</dt><dd id="summary-domain"></dd></div>
+                <div><dt>Started</dt><dd id="summary-started"></dd></div>
+                <div><dt>Ended</dt><dd id="summary-ended"></dd></div>
+                <div><dt>Study time</dt><dd id="summary-study"></dd></div>
+                <div><dt>Pause time</dt><dd id="summary-paused"></dd></div>
+                <div><dt>Pauses</dt><dd id="summary-pause-count"></dd></div>
+            </dl>
+            <button class="button button-login" id="summary-done" type="button">Done</button>
+        </dialog>
+    </main>
+{% endblock %}

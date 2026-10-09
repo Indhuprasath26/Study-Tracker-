@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#171b22">
+    <title>{% block title %}Study Tracker{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script defer src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</head>
+<body>
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a class="navbar-brand" href="/" aria-label="Study Tracker home">
+                <span class="navbar-logo" aria-hidden="true">ST</span>
+                <span>Study Tracker</span>
+            </a>
+
+            <nav class="navbar-links" id="primary-navigation" aria-label="Main navigation">
+                <a href="/" {% if request.path == '/' %}class="active" aria-current="page"{% endif %}>Tracker</a>
+                <a href="/dashboard" {% if request.path == '/dashboard' %}class="active" aria-current="page"{% endif %}>Dashboard</a>
+                <a href="/history" {% if request.path == '/history' %}class="active" aria-current="page"{% endif %}>History</a>
+                <a href="/report" {% if request.path == '/report' %}class="active" aria-current="page"{% endif %}>Monthly report</a>
+            </nav>
+
+            <div class="navbar-session" aria-label="Current study session">
+                <span class="navbar-session-dot" id="navbar-session-dot" aria-hidden="true"></span>
+                <span class="navbar-session-status" id="navbar-session-status">Idle</span>
+                <span class="navbar-session-timer" id="navbar-session-timer">00:00:00</span>
+            </div>
+
+            <button class="navbar-menu-toggle" id="navbar-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primary-navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    {% block content %}{% endblock %}
+</body>
+</html>

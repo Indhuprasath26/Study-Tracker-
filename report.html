@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Monthly Report | Study Time{% endblock %}
+{% block scripts %}
+<script defer src="{{ url_for('static', filename='js/report.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <main class="dashboard-shell report-shell">
+        <header class="dashboard-header">
+            <div>
+                <p class="eyebrow">PERSONAL STUDY LOG</p>
+                <h1>Monthly report</h1>
+                <p class="dashboard-subtitle">A simple look back at your study month.</p>
+            </div>
+        </header>
+
+        <section class="report-controls" aria-label="Choose report month">
+            <label for="report-month">Report month</label>
+            <input id="report-month" type="month" value="{{ month }}">
+        </section>
+
+        <p class="report-error" id="report-error" role="alert" hidden></p>
+
+        <section class="report-section" aria-labelledby="domain-report-heading">
+            <div class="history-heading">
+                <div>
+                    <p class="eyebrow">DOMAIN TOTALS</p>
+                    <h2 id="domain-report-heading">Study hours by domain</h2>
+                </div>
+            </div>
+            <div class="report-domain-grid" id="report-domain-grid"></div>
+        </section>
+
+        <section class="report-section" aria-labelledby="day-type-heading">
+            <div class="history-heading">
+                <div>
+                    <p class="eyebrow">DAILY AVERAGE</p>
+                    <h2 id="day-type-heading">College vs non-college days</h2>
+                </div>
+            </div>
+            <div class="report-average-grid">
+                <article class="average-card">
+                    <span class="average-dot college-dot" aria-hidden="true"></span>
+                    <div>
+                        <p>College days</p>
+                        <strong id="college-average">--:--:--</strong>
+                        <span id="college-day-count">0 logged days</span>
+                    </div>
+                </article>
+                <article class="average-card">
+                    <span class="average-dot non-college-dot" aria-hidden="true"></span>
+                    <div>
+                        <p>Non-college days</p>
+                        <strong id="non-college-average">--:--:--</strong>
+                        <span id="non-college-day-count">0 logged days</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="report-section" aria-labelledby="technology-report-heading">
+            <div class="history-heading">
+                <div>
+                    <p class="eyebrow">TECHNOLOGY DETAIL</p>
+                    <h2 id="technology-report-heading">Monthly hours by technology</h2>
+                </div>
+            </div>
+            <div class="monthly-technology-reports" id="monthly-technology-reports"></div>
+        </section>
+    </main>
+{% endblock %}
